@@ -169,7 +169,7 @@ WHOIS_API_KEY=your-key
 ANTHROPIC_API_KEY=your-key
 
 # App
-NEXT_PUBLIC_APP_URL=https://scamshield.vercel.app
+NEXT_PUBLIC_APP_URL=https://scamshield-io.vercel.app/
 ```
 
 ---

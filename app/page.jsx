@@ -23,14 +23,17 @@ export default function Home() {
   const [result, setResult] = useState(null)
   const [activeTab, setActiveTab] = useState('flags')
   const [errorMsg, setErrorMsg] = useState('')
+  const [showDebug, setShowDebug] = useState(false)
+
+  const displayUrl = url.replace(/^https?:\/\//i, '')
 
   const handleScan = async () => {
     if (!url.trim()) return
     setPhase('scanning')
     setResult(null)
     setErrorMsg('')
+    setShowDebug(false)
 
-    // Animate scan steps while API call is running
     let stepIdx = 0
     const stepInterval = setInterval(() => {
       setScanStep(SCAN_STEPS[stepIdx % SCAN_STEPS.length])
@@ -67,7 +70,6 @@ export default function Home() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
 
-      {/* ── Header ───────────────────────────────── */}
       <header style={{
         borderBottom: '1px solid var(--border)',
         background: 'var(--surface)',
@@ -96,8 +98,6 @@ export default function Home() {
       </header>
 
       <main style={{ maxWidth: 860, margin: '0 auto', padding: '40px 20px' }}>
-
-        {/* ── Hero ─────────────────────────────────── */}
         {phase === 'idle' && (
           <div className="fade-in" style={{ textAlign: 'center', marginBottom: 48 }}>
             <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 4, color: 'var(--accent)', marginBottom: 16 }}>
@@ -122,7 +122,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* ── URL Input ────────────────────────────── */}
         <div style={{
           background: 'var(--surface)',
           border: `1px solid ${phase === 'result' ? verdictColor + '55' : 'var(--border)'}`,
@@ -140,8 +139,8 @@ export default function Home() {
             }}>
               <span style={{ color: 'var(--muted)', fontFamily: 'monospace', fontSize: 12, flexShrink: 0 }}>https://</span>
               <input
-                value={url}
-                onChange={e => setUrl(e.target.value)}
+                value={displayUrl}
+                onChange={e => setUrl(e.target.value.replace(/^https?:\/\//i, ''))}
                 onKeyDown={e => e.key === 'Enter' && handleScan()}
                 placeholder="suspicious-site.com"
                 style={{
@@ -164,7 +163,6 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Scanning progress */}
           {phase === 'scanning' && (
             <div style={{ marginTop: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
@@ -185,7 +183,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* Error state */}
           {phase === 'error' && (
             <div style={{ marginTop: 12, color: 'var(--red)', fontFamily: 'monospace', fontSize: 12 }}>
               ⚠ {errorMsg}
@@ -193,17 +190,14 @@ export default function Home() {
           )}
         </div>
 
-        {/* ── Results ──────────────────────────────── */}
         {phase === 'result' && result && (
           <div className="fade-in" style={{ display: 'grid', gap: 20 }}>
-
-            {/* Score row */}
             <div style={{
               background: 'var(--surface)', border: '1px solid var(--border)',
               borderRadius: 12, padding: 24,
               display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 24, alignItems: 'center',
             }}>
-              <TrustScore score={result.trust_score} verdict={result.verdict} />
+              <TrustScore score={result.trust_score ?? result.trustScore} verdict={result.verdict} />
               <div>
                 <div style={{ fontFamily: 'monospace', fontSize: 10, color: 'var(--muted)', letterSpacing: 2, marginBottom: 6 }}>
                   SCANNED: {result.domain}
@@ -224,7 +218,7 @@ export default function Home() {
                     🚨 REPORT THIS SITE
                   </button>
                   <button
-                    onClick={() => { setUrl(''); setPhase('idle') }}
+                    onClick={() => { setUrl(''); setPhase('idle'); setShowDebug(false) }}
                     style={{
                       background: 'none', border: '1px solid var(--border)', borderRadius: 6,
                       padding: '8px 16px', color: 'var(--muted)', fontFamily: 'monospace',
@@ -236,40 +230,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Tabs */}
             <div style={{
               display: 'flex', gap: 4, background: 'var(--surface)',
-              borderRadius: 8, padding: 4, border: '1px solid var(--border)',
-            }}>
-              {[
-                { id: 'flags', label: '🔍 AI Red Flags' },
-                { id: 'community', label: '👥 Community Reports' },
-                { id: 'report-authority', label: '📋 Report to Authorities' },
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  style={{
-                    flex: 1, padding: '10px 12px', border: 'none', borderRadius: 6,
-                    cursor: 'pointer',
-                    background: activeTab === tab.id ? 'var(--card)' : 'none',
-                    color: activeTab === tab.id ? 'var(--text)' : 'var(--muted)',
-                    fontFamily: 'monospace', fontSize: 11,
-                    fontWeight: activeTab === tab.id ? 700 : 400,
-                    letterSpacing: 1, transition: 'all 0.2s',
-                    borderBottom: activeTab === tab.id ? '2px solid var(--accent)' : '2px solid transparent',
-                  }}>
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            {activeTab === 'flags' && <FlagList flags={result.flags || []} />}
-            {activeTab === 'community' && <CommunityReports domain={result.domain} />}
-            {activeTab === 'report-authority' && <AuthorityGuide domain={result.domain} />}
-          </div>
-        )}
-      </main>
-    </div>
-  )
-}
+              borderRadius: 8, padding: 4, bor

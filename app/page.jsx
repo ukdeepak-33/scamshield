@@ -1,4 +1,4 @@
-use client'
+'use client'
 import { useState } from 'react'
 import TrustScore from '@/components/TrustScore'
 import FlagList from '@/components/FlagList'
@@ -23,6 +23,7 @@ export default function Home() {
   const [result, setResult] = useState(null)
   const [activeTab, setActiveTab] = useState('flags')
   const [errorMsg, setErrorMsg] = useState('')
+  const [showDebug, setShowDebug] = useState(false)
 
   const displayUrl = url.replace(/^https?:\/\//i, '')
 
@@ -31,8 +32,8 @@ export default function Home() {
     setPhase('scanning')
     setResult(null)
     setErrorMsg('')
+    setShowDebug(false)
 
-    // Animate scan steps while API call is running
     let stepIdx = 0
     const stepInterval = setInterval(() => {
       setScanStep(SCAN_STEPS[stepIdx % SCAN_STEPS.length])
@@ -69,7 +70,6 @@ export default function Home() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
 
-      {/* ── Header ───────────────────────────────── */}
       <header style={{
         borderBottom: '1px solid var(--border)',
         background: 'var(--surface)',
@@ -98,8 +98,6 @@ export default function Home() {
       </header>
 
       <main style={{ maxWidth: 860, margin: '0 auto', padding: '40px 20px' }}>
-
-        {/* ── Hero ─────────────────────────────────── */}
         {phase === 'idle' && (
           <div className="fade-in" style={{ textAlign: 'center', marginBottom: 48 }}>
             <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 4, color: 'var(--accent)', marginBottom: 16 }}>
@@ -124,7 +122,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* ── URL Input ────────────────────────────── */}
         <div style={{
           background: 'var(--surface)',
           border: `1px solid ${phase === 'result' ? verdictColor + '55' : 'var(--border)'}`,
@@ -166,7 +163,6 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Scanning progress */}
           {phase === 'scanning' && (
             <div style={{ marginTop: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
@@ -187,7 +183,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* Error state */}
           {phase === 'error' && (
             <div style={{ marginTop: 12, color: 'var(--red)', fontFamily: 'monospace', fontSize: 12 }}>
               ⚠ {errorMsg}
@@ -195,11 +190,8 @@ export default function Home() {
           )}
         </div>
 
-        {/* ── Results ──────────────────────────────── */}
         {phase === 'result' && result && (
           <div className="fade-in" style={{ display: 'grid', gap: 20 }}>
-
-            {/* Score row */}
             <div style={{
               background: 'var(--surface)', border: '1px solid var(--border)',
               borderRadius: 12, padding: 24,
@@ -226,8 +218,18 @@ export default function Home() {
                     🚨 REPORT THIS SITE
                   </button>
                   <button
-                    onClick={() => { setUrl(''); setPhase('idle') }}
+                    onClick={() => { setUrl(''); setPhase('idle'); setShowDebug(false) }}
                     style={{
                       background: 'none', border: '1px solid var(--border)', borderRadius: 6,
                       padding: '8px 16px', color: 'var(--muted)', fontFamily: 'monospace',
                       fontSize: 10, letterSpacing: 1, cursor: 'pointer',
+                    }}>
+                    ← SCAN ANOTHER
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div style={{
+              display: 'flex', gap: 4, background: 'var(--surface)',
+              borderRadius: 8, padding: 4, bor
